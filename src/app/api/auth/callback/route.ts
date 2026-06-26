@@ -6,7 +6,7 @@ import { upsertUser } from "@/lib/supabase";
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
   const code = searchParams.get("code");
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+  const appUrl = `https://${process.env.NEXT_PUBLIC_VERCEL_URL}`;
 
   if (!code) {
     return NextResponse.redirect(`${appUrl}/?error=no_code`);
