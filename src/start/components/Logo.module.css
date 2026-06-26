@@ -1,7 +1,0 @@
-.logo {
-  font-family: var(--font-logo);
-  font-size: clamp(0.75rem, 2.5vw, 1rem);
-  color: #fff;
-  letter-spacing: 0.04em;
-  line-height: 1.6;
-}
