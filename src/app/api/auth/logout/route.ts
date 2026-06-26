@@ -4,6 +4,6 @@ import { getSession } from "@/lib/session";
 export async function POST() {
   const session = await getSession();
   session.destroy();
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+  const appUrl = `https://${process.env.NEXT_PUBLIC_VERCEL_URL}`;
   return NextResponse.redirect(`${appUrl}/`);
 }
