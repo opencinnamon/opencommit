@@ -1,0 +1,238 @@
+.page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.main {
+  flex: 1;
+  padding: 2.5rem 1.8rem;
+  max-width: 680px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+.fadingIn {
+  animation: fadeIn 0.3s ease forwards;
+}
+
+.fadingOut {
+  animation: fadeOut 0.25s ease forwards;
+  pointer-events: none;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeOut {
+  from { opacity: 1; transform: translateY(0); }
+  to { opacity: 0; transform: translateY(6px); }
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+}
+
+.sectionTitle {
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  letter-spacing: 0.03em;
+}
+
+.repoHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+
+.activeAccount {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+
+.miniAvatar {
+  border-radius: 50%;
+}
+
+.accountList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.accountCard {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  padding: 0.85rem 1rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  cursor: pointer;
+  width: 100%;
+  text-align: left;
+  transition: border-color 0.15s, background 0.15s;
+  color: var(--text);
+}
+
+.accountCard:hover {
+  border-color: var(--border-hover);
+  background: #181818;
+}
+
+.accountAvatar {
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.accountInfo {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.18rem;
+}
+
+.accountName {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--text);
+}
+
+.accountType {
+  font-size: 0.72rem;
+  color: var(--text-faint);
+}
+
+.chevron {
+  flex-shrink: 0;
+}
+
+.skeletonCard {
+  cursor: default;
+  pointer-events: none;
+}
+
+.skeletonAvatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.skeletonLines {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.skeletonLine {
+  height: 12px;
+  border-radius: 4px;
+}
+
+.repoList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.repoCard {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  padding: 0.9rem 1rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  cursor: pointer;
+  width: 100%;
+  text-align: left;
+  transition: border-color 0.15s, background 0.15s;
+  color: var(--text);
+}
+
+.repoCard:hover {
+  border-color: var(--border-hover);
+  background: #181818;
+}
+
+.repoTop {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.repoName {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.privateBadge {
+  font-size: 0.65rem;
+  font-weight: 500;
+  color: #f59e0b;
+  background: rgba(245, 158, 11, 0.1);
+  border: 1px solid rgba(245, 158, 11, 0.2);
+  padding: 0.1rem 0.4rem;
+  border-radius: 3px;
+  letter-spacing: 0.03em;
+}
+
+.langBadge {
+  font-size: 0.65rem;
+  color: var(--text-faint);
+  background: rgba(255,255,255,0.05);
+  border: 1px solid var(--border);
+  padding: 0.1rem 0.4rem;
+  border-radius: 3px;
+}
+
+.repoDesc {
+  font-size: 0.76rem;
+  color: var(--text-muted);
+  line-height: 1.5;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.repoMeta {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  flex-wrap: wrap;
+}
+
+.metaItem {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.7rem;
+  color: var(--text-faint);
+}
+
+.empty {
+  font-size: 0.82rem;
+  color: var(--text-faint);
+  padding: 1rem 0;
+}
+
+@media (max-width: 600px) {
+  .main {
+    padding: 2rem 1rem;
+  }
+}
