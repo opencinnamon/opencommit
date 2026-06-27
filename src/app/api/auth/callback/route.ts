@@ -3,10 +3,16 @@ import { getSession } from "@/lib/session";
 import { getAuthenticatedUser } from "@/lib/github";
 import { upsertUser } from "@/lib/supabase";
 
+function getAppUrl(req: NextRequest): string {
+  const host = req.headers.get("host") || process.env.NEXT_PUBLIC_VERCEL_URL || "";
+  const proto = host.includes("localhost") ? "http" : "https";
+  return `${proto}://${host}`;
+}
+
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
   const code = searchParams.get("code");
-  const appUrl = `https://${process.env.NEXT_PUBLIC_VERCEL_URL}`;
+  const appUrl = getAppUrl(req);
 
   if (!code) {
     return NextResponse.redirect(`${appUrl}/?error=no_code`);
