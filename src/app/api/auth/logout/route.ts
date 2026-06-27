@@ -1,9 +1,14 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { getSession } from "@/lib/session";
 
-export async function POST() {
+function getAppUrl(req: NextRequest): string {
+  const host = req.headers.get("host") || process.env.NEXT_PUBLIC_VERCEL_URL || "";
+  const proto = host.includes("localhost") ? "http" : "https";
+  return `${proto}://${host}`;
+}
+
+export async function POST(req: NextRequest) {
   const session = await getSession();
   session.destroy();
-  const appUrl = `https://${process.env.NEXT_PUBLIC_VERCEL_URL}`;
-  return NextResponse.redirect(`${appUrl}/`);
+  return NextResponse.redirect(getAppUrl(req));
 }
