@@ -16,29 +16,38 @@ interface Account {
 interface Props {
   username: string;
   avatarUrl: string;
-  orgs: GitHubOrg[];
 }
 
-export default function StartClient({ username, avatarUrl, orgs }: Props) {
+export default function StartClient({ username, avatarUrl }: Props) {
   const router = useRouter();
   const [phase, setPhase] = useState<"accounts" | "repos">("accounts");
   const [fading, setFading] = useState(false);
   const [selectedAccount, setSelectedAccount] = useState<Account | null>(null);
   const [repos, setRepos] = useState<GitHubRepo[]>([]);
   const [loadingRepos, setLoadingRepos] = useState(false);
+  const [orgs, setOrgs] = useState<GitHubOrg[]>([]);
   const [orgsLoading, setOrgsLoading] = useState(true);
-  const [visibleOrgs, setVisibleOrgs] = useState<GitHubOrg[]>([]);
   const skeletonTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
-    skeletonTimer.current = setTimeout(() => {
-      setVisibleOrgs(orgs);
-      setOrgsLoading(false);
-    }, 2000);
+    async function fetchOrgs() {
+      try {
+        const res = await fetch("/api/github/orgs");
+        const data = await res.json();
+        setOrgs(Array.isArray(data) ? data : []);
+      } catch {
+        setOrgs([]);
+      } finally {
+        skeletonTimer.current = setTimeout(() => {
+          setOrgsLoading(false);
+        }, 1500);
+      }
+    }
+    fetchOrgs();
     return () => {
       if (skeletonTimer.current) clearTimeout(skeletonTimer.current);
     };
-  }, [orgs]);
+  }, []);
 
   function fadeTransition(cb: () => void) {
     setFading(true);
@@ -75,7 +84,7 @@ export default function StartClient({ username, avatarUrl, orgs }: Props) {
 
   const allAccounts: Account[] = [
     { login: username, avatarUrl, type: "user" },
-    ...visibleOrgs.map((o) => ({
+    ...orgs.map((o) => ({
       login: o.login,
       avatarUrl: o.avatar_url,
       type: "org" as const,
@@ -160,7 +169,18 @@ export default function StartClient({ username, avatarUrl, orgs }: Props) {
         ) : (
           <section className={styles.section}>
             <div className={styles.repoHeader}>
-              <h2 className={styles.sectionTitle}>Repository list</h2>
+              <div className={styles.repoHeaderLeft}>
+                <button
+                  className={styles.backBtn}
+                  onClick={() => fadeTransition(() => setPhase("accounts"))}
+                >
+                  <svg viewBox="0 0 24 24" width="14" height="14" fill="none">
+                    <path d="M15 18L9 12L15 6" stroke="#888" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                  Back
+                </button>
+                <h2 className={styles.sectionTitle}>Repository list</h2>
+              </div>
               {selectedAccount && (
                 <div className={styles.activeAccount}>
                   <Image
