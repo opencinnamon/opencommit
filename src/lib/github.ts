@@ -209,3 +209,35 @@ export function getLanguageFromExt(filename: string): string {
   const ext = filename.split(".").pop()?.toLowerCase() || "";
   return map[ext] || "text";
 }
+
+export function isImageFile(name: string): boolean {
+  const exts = [".png", ".jpg", ".jpeg", ".gif", ".webp", ".svg", ".bmp", ".ico", ".avif"];
+  const lower = name.toLowerCase();
+  return exts.some((ext) => lower.endsWith(ext));
+}
+
+export function isAudioFile(name: string): boolean {
+  const exts = [".mp3", ".wav", ".ogg", ".flac", ".aac", ".m4a", ".opus", ".weba"];
+  const lower = name.toLowerCase();
+  return exts.some((ext) => lower.endsWith(ext));
+}
+
+export function getImageMimeType(name: string): string {
+  const ext = name.split(".").pop()?.toLowerCase() || "";
+  const map: Record<string, string> = {
+    png: "image/png", jpg: "image/jpeg", jpeg: "image/jpeg",
+    gif: "image/gif", webp: "image/webp", svg: "image/svg+xml",
+    bmp: "image/bmp", ico: "image/x-icon", avif: "image/avif",
+  };
+  return map[ext] || "image/png";
+}
+
+export function getAudioMimeType(name: string): string {
+  const ext = name.split(".").pop()?.toLowerCase() || "";
+  const map: Record<string, string> = {
+    mp3: "audio/mpeg", wav: "audio/wav", ogg: "audio/ogg",
+    flac: "audio/flac", aac: "audio/aac", m4a: "audio/mp4",
+    opus: "audio/opus", weba: "audio/webm",
+  };
+  return map[ext] || "audio/mpeg";
+}
