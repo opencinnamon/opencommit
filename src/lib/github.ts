@@ -26,7 +26,7 @@ export async function getUserOrgs(token: string): Promise<GitHubOrg[]> {
 
 export async function getUserRepos(token: string): Promise<GitHubRepo[]> {
   const res = await fetch(
-    `${BASE}/user/repos?per_page=100&sort=updated&affiliation=owner`,
+    `${BASE}/user/repos?per_page=100&sort=updated&affiliation=owner&visibility=all`,
     { headers: headers(token) }
   );
   if (!res.ok) throw new Error("Failed to fetch repos");
@@ -38,7 +38,7 @@ export async function getOrgRepos(
   org: string
 ): Promise<GitHubRepo[]> {
   const res = await fetch(
-    `${BASE}/orgs/${org}/repos?per_page=100&sort=updated`,
+    `${BASE}/orgs/${org}/repos?per_page=100&sort=updated&type=all`,
     { headers: headers(token) }
   );
   if (!res.ok) throw new Error("Failed to fetch org repos");
