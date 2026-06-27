@@ -15,7 +15,7 @@ import {
   LoadMoreIcon,
 } from "@/components/Icons";
 import { GitHubContent } from "@/types";
-import { isCodeFile, isDocFile, getLanguageFromExt } from "@/lib/github";
+import { isCodeFile, isDocFile, getLanguageFromExt, isImageFile, isAudioFile, getImageMimeType, getAudioMimeType } from "@/lib/github";
 import styles from "./RepoClient.module.css";
 
 interface Props {
@@ -29,6 +29,8 @@ interface Props {
 type View =
   | { kind: "explorer" }
   | { kind: "file"; path: string; content: string; sha: string; lang: string }
+  | { kind: "image"; path: string; sha: string; dataUrl: string; name: string }
+  | { kind: "audio"; path: string; sha: string; dataUrl: string; name: string; mimeType: string }
   | { kind: "create-folder"; parentPath: string }
   | { kind: "edit"; path: string; content: string; sha: string };
 
@@ -140,8 +142,31 @@ export default function RepoClient({
           `/api/repo/file?owner=${owner}&repo=${repoName}&path=${encodeURIComponent(item.path)}`
         );
         const data = await res.json();
+
+        if (isImageFile(item.name)) {
+          const mime = getImageMimeType(item.name);
+          const dataUrl = data.content
+            ? `data:${mime};base64,${data.content.replace(/\n/g, "")}`
+            : "";
+          setView({ kind: "image", path: item.path, sha: data.sha, dataUrl, name: item.name });
+          return;
+        }
+
+        if (isAudioFile(item.name)) {
+          const mime = getAudioMimeType(item.name);
+          const dataUrl = data.content
+            ? `data:${mime};base64,${data.content.replace(/\n/g, "")}`
+            : "";
+          setView({ kind: "audio", path: item.path, sha: data.sha, dataUrl, name: item.name, mimeType: mime });
+          return;
+        }
+
         const raw = data.content
-          ? Buffer.from(data.content, data.encoding === "base64" ? "base64" : "utf8").toString("utf8")
+          ? decodeURIComponent(
+              Array.from(atob(data.content.replace(/\n/g, "")))
+                .map((c: string) => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2))
+                .join("")
+            )
           : "";
         setView({
           kind: "file",
@@ -190,7 +215,11 @@ export default function RepoClient({
       );
       const updated = await updatedRes.json();
       const raw = updated.content
-        ? Buffer.from(updated.content, "base64").toString("utf8")
+        ? decodeURIComponent(
+            Array.from(atob(updated.content.replace(/\n/g, "")))
+              .map((c: string) => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2))
+              .join("")
+          )
         : "";
       const name = path.split("/").pop() || path;
       fade(() => {
@@ -281,6 +310,20 @@ export default function RepoClient({
     if (item.type === "dir") return <FolderIcon />;
     if (isDocFile(item.name)) return <DocFileIcon />;
     if (isCodeFile(item.name)) return <CodeFileIcon />;
+    if (isImageFile(item.name)) return (
+      <svg viewBox="0 0 24 24" width="15" height="15" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ flexShrink: 0 }}>
+        <rect x="3" y="3" width="18" height="18" rx="2" stroke="#6b7280" strokeWidth="2"/>
+        <circle cx="8.5" cy="8.5" r="1.5" fill="#6b7280"/>
+        <path d="M3 15L8 10L12 14L15 11L21 17" stroke="#6b7280" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+      </svg>
+    );
+    if (isAudioFile(item.name)) return (
+      <svg viewBox="0 0 24 24" width="15" height="15" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ flexShrink: 0 }}>
+        <path d="M9 18V5l12-2v13" stroke="#6b7280" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+        <circle cx="6" cy="18" r="3" stroke="#6b7280" strokeWidth="2"/>
+        <circle cx="18" cy="16" r="3" stroke="#6b7280" strokeWidth="2"/>
+      </svg>
+    );
     return <DocFileIcon />;
   }
 
@@ -396,7 +439,15 @@ export default function RepoClient({
   return (
     <div className={styles.page}>
       <header className={styles.header}>
-        <Logo />
+        <div className={styles.headerLeft}>
+          <a href="/start" className={styles.backBtn}>
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none">
+              <path d="M15 18L9 12L15 6" stroke="#888" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+            Back
+          </a>
+          <Logo />
+        </div>
         {sessionUser && (
           <UserMenu username={sessionUser.username} avatarUrl={sessionUser.avatarUrl} />
         )}
@@ -538,6 +589,76 @@ export default function RepoClient({
                   {saveError}
                 </div>
               )}
+            </div>
+          )}
+
+          {view.kind === "image" && (
+            <div className={styles.mediaView}>
+              <div className={styles.fileBreadcrumb}>
+                <button className={styles.breadcrumbLink} onClick={() => fade(() => setView({ kind: "explorer" }))}>
+                  {owner}
+                </button>
+                {view.path.split("/").map((part, i, arr) => (
+                  <span key={i} className={styles.breadcrumbPart}>
+                    <span className={styles.breadcrumbSep}>/</span>
+                    {i === arr.length - 1 ? <span className={styles.breadcrumbCurrent}>{part}</span> : <span>{part}</span>}
+                  </span>
+                ))}
+              </div>
+              <div className={styles.mediaActions}>
+                <a href={view.dataUrl} download={view.name} className={styles.editBtn}>
+                  Download
+                </a>
+                {canWrite && (
+                  <button
+                    className={styles.deleteBtn}
+                    onClick={() => setDeleteTarget({ path: view.path, sha: view.sha, name: view.name })}
+                  >
+                    <TrashIcon />
+                    Delete
+                  </button>
+                )}
+              </div>
+              <div className={styles.imageWrap}>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={view.dataUrl} alt={view.name} className={styles.imagePreview} />
+              </div>
+            </div>
+          )}
+
+          {view.kind === "audio" && (
+            <div className={styles.mediaView}>
+              <div className={styles.fileBreadcrumb}>
+                <button className={styles.breadcrumbLink} onClick={() => fade(() => setView({ kind: "explorer" }))}>
+                  {owner}
+                </button>
+                {view.path.split("/").map((part, i, arr) => (
+                  <span key={i} className={styles.breadcrumbPart}>
+                    <span className={styles.breadcrumbSep}>/</span>
+                    {i === arr.length - 1 ? <span className={styles.breadcrumbCurrent}>{part}</span> : <span>{part}</span>}
+                  </span>
+                ))}
+              </div>
+              <div className={styles.mediaActions}>
+                <a href={view.dataUrl} download={view.name} className={styles.editBtn}>
+                  Download
+                </a>
+                {canWrite && (
+                  <button
+                    className={styles.deleteBtn}
+                    onClick={() => setDeleteTarget({ path: view.path, sha: view.sha, name: view.name })}
+                  >
+                    <TrashIcon />
+                    Delete
+                  </button>
+                )}
+              </div>
+              <div className={styles.audioWrap}>
+                <div className={styles.audioName}>{view.name}</div>
+                <audio controls className={styles.audioPlayer} src={view.dataUrl}>
+                  Your browser does not support audio.
+                </audio>
+              </div>
             </div>
           )}
 
